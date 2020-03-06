@@ -9,9 +9,6 @@ Overview
 
     * - docs
       - |docs|
-    * - tests
-      - |
-        |
     * - package
       - | |version| |wheel| |supported-versions| |supported-implementations|
         | |commits-since|
