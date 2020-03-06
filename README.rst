@@ -94,15 +94,15 @@ Note, to combine the coverage data from all the tox environments run:
 Release
 =======
 
-Bump version for a new release:
+Bump version for a new release::
 
     bumpversion --new-version 2020.0.x patch
 
-Push new tag to github:
+Push new tag to github::
 
     git push -u origin master v2020.0.x
 
-Release to pypi:
+Release to pypi::
 
     gmake dist
     gmake release
