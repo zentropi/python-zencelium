@@ -1,0 +1,69 @@
+# This file exists so you can easily regenerate your project.
+#
+# `cookiepatcher` is a convenient shim around `cookiecutter`
+# for regenerating projects (it will generate a .cookiecutterrc
+# automatically for any template). To use it:
+#
+#    pip install cookiepatcher
+#    cookiepatcher gh:ionelmc/cookiecutter-pylibrary project-path
+#
+# See:
+#    https://pypi.org/project/cookiepatcher
+#
+# Alternatively, you can run:
+#
+#    cookiecutter --overwrite-if-exists --config-file=project-path/.cookiecutterrc gh:ionelmc/cookiecutter-pylibrary
+
+default_context:
+
+    _extensions:               ['jinja2_time.TimeExtension']
+    _template:                 'cookiecutter-pylibrary'
+    allow_tests_inside_package: 'no'
+    appveyor:                  'no'
+    c_extension_function:      'longest'
+    c_extension_module:        '_zencelium'
+    c_extension_optional:      'no'
+    c_extension_support:       'no'
+    c_extension_test_pypi:     'no'
+    c_extension_test_pypi_username: 'hiway'
+    codacy:                    'no'
+    codacy_projectid:          ' '
+    codeclimate:               'no'
+    codecov:                   'no'
+    command_line_interface:    'click'
+    command_line_interface_bin_name: 'zencelium'
+    coveralls:                 'no'
+    coveralls_token:           ' '
+    distribution_name:         'zencelium'
+    email:                     'harshad@sharma.io'
+    full_name:                 'Harshad Sharma'
+    landscape:                 'no'
+    license:                   'BSD 3-Clause License'
+    linter:                    'flake8'
+    package_name:              'zencelium'
+    project_name:              'zencelium'
+    project_short_description: 'Zencelium: Personal Zentropi Instance Server'
+    pypi_badge:                'yes'
+    pypi_disable_upload:       'no'
+    release_date:              'today'
+    repo_hosting:              'github.com'
+    repo_hosting_domain:       'github.com'
+    repo_name:                 'python-zencelium'
+    repo_username:             'zentropi'
+    requiresio:                'no'
+    scrutinizer:               'no'
+    setup_py_uses_setuptools_scm: 'no'
+    setup_py_uses_test_runner: 'no'
+    sphinx_docs:               'yes'
+    sphinx_docs_hosting:       'https://zencelium.readthedocs.io/'
+    sphinx_doctest:            'yes'
+    sphinx_theme:              'sphinx-py3doc-enhanced-theme'
+    test_matrix_configurator:  'no'
+    test_matrix_separate_coverage: 'no'
+    test_runner:               'pytest'
+    travis:                    'no'
+    travis_osx:                'no'
+    version:                   '2020.0.0'
+    website:                   'https://harshadsharma.com/'
+    year_from:                 '2020'
+    year_to:                   '2020'
