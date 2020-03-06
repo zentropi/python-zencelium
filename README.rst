@@ -35,9 +35,9 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/zencelium
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/zentropi/python-zencelium/v2020.0.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/zentropi/python-zencelium/v2020.0.1.svg
     :alt: Commits since latest release
-    :target: https://github.com/zentropi/python-zencelium/compare/v2020.0.0...master
+    :target: https://github.com/zentropi/python-zencelium/compare/v2020.0.1...master
 
 
 

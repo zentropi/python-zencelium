@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='zencelium',
-    version='2020.0.0',
+    version='2020.0.1',
     license='BSD-3-Clause',
     description='Zencelium: Personal Zentropi Instance Server',
     long_description='%s\n%s' % (

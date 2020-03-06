@@ -20,7 +20,7 @@ project = 'zencelium'
 year = '2020'
 author = 'Harshad Sharma'
 copyright = '{0}, {1}'.format(year, author)
-version = release = '2020.0.0'
+version = release = '2020.0.1'
 
 pygments_style = 'trac'
 templates_path = ['.']
