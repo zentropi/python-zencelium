@@ -34,14 +34,23 @@ nav li.logo {
 nav a {
     color: white;
     text-decoration: none;
-    /* text-shadow: 2px 2px 2px #000; */
     text-shadow: 1px 1px 3px #202020;
+}
+
+main {
+    min-height: calc(100vh - 4rem);
+}
+
+footer {
+    height: 3rem;
+    background-color: #303030;
+    background-image: linear-gradient(#303030, #404040);
+
 }
 
 @media all and (min-width: 520px) {
     nav {
         display: grid;
-        /* align-items: center; */
         grid-template: "navigation account-actions";
     }
     nav ul.navigation {
@@ -49,10 +58,6 @@ nav a {
     }
 
     nav li {
-        /* height: 2rem; */
-        /* display: table-cell;
-        vertical-align: middle; */
-        /* display: inline-block; */
         position: relative;
         top: -0.8rem;
         display: inline-block;
@@ -60,7 +65,6 @@ nav a {
     }
 
     nav li.logo {
-        /* display: table-cell; */
         position: relative;
         top: 0;
         display: inline-block;
@@ -72,13 +76,11 @@ nav a {
     }
 
     nav ul.account-actions {
-        width: 100%;
         grid-area: account-actions;
         text-align: right;
     }
 
     nav ul.account-actions li {
-        /* padding-top: 1.25rem; */
         display: inline-block;
         position: relative;
         top: 0.7rem;
