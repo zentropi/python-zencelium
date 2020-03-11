@@ -1,0 +1,8 @@
+<a name="create_space"><h3>Create Space</h3></a>
+<form action="{{ url_for('spaces') }}" method="POST">
+    <div>
+        <label for="name">Space name:</label>
+        <input id="name" name="name" type="text" value="{{space_name}}">
+        <button type="submit">Create Space</button>
+    </div>
+</form>

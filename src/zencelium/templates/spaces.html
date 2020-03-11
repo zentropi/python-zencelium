@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Spaces</h2>
+
+{% if not spaces %}
+    <em>No spaces created yet.</em>
+{% else %}
+    {% for space in spaces %}
+        <h3><a href="{{ url_for('space_detail', name=space.name) }}">{{space.name}}</a></h3>
+    {% endfor %}
+{% endif %}
+<hr />
+{% include "form/space_create.html" %}
+{% endblock content %}

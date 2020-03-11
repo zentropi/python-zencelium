@@ -1,0 +1,4 @@
+<form action="{{ url_for('agent_delete', name=agent.name) }}" method="POST" class="inline-form">
+    <input id="name" name="name" type="hidden" value="{{agent.name}}">
+    <button type="submit">delete {{agent.name}}</button>
+</form>
