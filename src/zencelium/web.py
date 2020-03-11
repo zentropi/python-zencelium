@@ -1,9 +1,13 @@
 import asyncio
 import logging
 from functools import wraps
+from hashlib import sha256
+from pathlib import Path
 from signal import SIGTERM
 from signal import SIGINT
+from uuid import uuid4
 
+from appdirs import AppDirs
 from peewee import IntegrityError
 from hypercorn.asyncio import serve as hypercorn_serve
 from hypercorn.config import Config as HypercornConfig
@@ -21,19 +25,41 @@ from quart import websocket
 from zentropi import Frame
 from zentropi import Kind
 
+from . import __version__, __app_name__
 from .agent_server import AgentServer
+from .config import BaseConfig
 from .models import Account
 from .models import Agent
 from .models import Space
 from .models import db_init
+from .space_server import space_server
 
 logger = logging.getLogger(__name__)
 
-app = Quart('zencelium')
+app_dirs = AppDirs('zencelium', version=__version__)
+
+CONFIG_PATH = Path(app_dirs.user_config_dir).joinpath(f'{__app_name__}.ini')
+LOG_PATH = Path(app_dirs.user_log_dir).joinpath(f'{__app_name__}.log')
+
+
+class Config(BaseConfig):
+    log_file_name = f'{__app_name__}.log'
+    log_file_path = str(LOG_PATH)
+    secret_key = ''
+
+    def init(self):
+        if not self.secret_key:
+            self.secret_key = sha256(uuid4().bytes).hexdigest()
+        super().init()
+
+
+config = Config(app_name=f'{__app_name__}', config_path=CONFIG_PATH)
+config.init()
+
+app = Quart(f'{__app_name__}')
 app.jinja_env.line_statement_prefix = '@'
 app.jinja_env.line_comment_prefix = '##'
-app.secret_key = 'uPqa6poW2hd5e3bKLcYrzDcNzaSV85ymWCAkyPgMA3'
-from .space_server import space_server
+app.secret_key = config.secret_key
 
 
 def login_required(fn):
@@ -338,7 +364,7 @@ async def space_leave(account, name):
 async def console(account):
     agent = account.account_agent()
     return await render_template(
-        'console.html', 
+        'console.html',
         agent_token=agent.token,
         agent_spaces=agent.spaces())
 
