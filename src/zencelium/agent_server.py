@@ -202,7 +202,7 @@ class AgentServer(object):
         await self.websocket_send(frame.reply('leave-ok'))
 
     @on_command('*')
-    async def cmd_relay(self, frame: Frame):
+    async def cmd_unknown(self, frame: Frame):
         await self.websocket_send(frame.reply('unknown-command', data={'command': frame.name}))
 
     @on_event('*')
