@@ -25,7 +25,9 @@ from quart import websocket
 from zentropi import Frame
 from zentropi import Kind
 
-from . import __version__, __app_name__
+from . import __app_name__
+from . import __version__
+from . import configure_logging
 from .agent_server import AgentServer
 from .config import BaseConfig
 from .models import Account
@@ -45,6 +47,7 @@ LOG_PATH = Path(app_dirs.user_log_dir).joinpath(f'{__app_name__}.log')
 class Config(BaseConfig):
     log_file_name = f'{__app_name__}.log'
     log_file_path = str(LOG_PATH)
+    log_level = 'warning'
     secret_key = ''
 
     def init(self):
@@ -211,10 +214,10 @@ async def agent_join(account, name):
         agent = Agent.get(name=name)
         agent.join_space(space_name)
         spaces = list(agent.spaces())
-        try:
-            await space_server.agent_spaces_update(agent, spaces)
-        except KeyError:
-            pass
+        # try:
+        #     await space_server.agent_spaces_update(agent, spaces)
+        # except KeyError:
+        #     pass
         try:
             await space_server.agent_join(agent, spaces)
         except KeyError:
@@ -258,10 +261,10 @@ async def spaces(account):
             space = account.create_space(name)
             agent = account.account_agent()
             agent.join_space(space.name)
-            try:
-                await space_server.agent_spaces_update(agent, [space])
-            except KeyError:
-                pass
+            # try:
+            #     await space_server.agent_spaces_update(agent, [space])
+            # except KeyError:
+            #     pass
             try:
                 await space_server.agent_join(agent, [space])
             except KeyError:
@@ -375,9 +378,12 @@ async def agent_websocket():
     await agent_server.start()
 
 
-def run(bind, port):
-    shutdown_event = asyncio.Event()
+def run(bind, port, log_level=config.log_level):
+    global config
+    log_level = getattr(logging, log_level.upper())
+    configure_logging(log_level=log_level, file_path=config.log_file_path)
 
+    shutdown_event = asyncio.Event()
 
     def _signal_handler(*_):
         shutdown_event.set()
@@ -386,9 +392,9 @@ def run(bind, port):
     loop.add_signal_handler(SIGTERM, _signal_handler)
     loop.add_signal_handler(SIGINT, _signal_handler)
 
-    config = HypercornConfig()
+    hyper_config = HypercornConfig()
 
-    config.bind = [f'{bind}:{port}']
+    hyper_config.bind = [f'{bind}:{port}']
 
     loop.run_until_complete(hypercorn_serve(
-        app, config, shutdown_trigger=shutdown_event.wait))
+        app, hyper_config, shutdown_trigger=shutdown_event.wait))
