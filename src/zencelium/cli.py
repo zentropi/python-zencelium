@@ -25,5 +25,7 @@ def cli():
 @cli.command('run')
 @click.option('--bind', default='127.0.0.1')
 @click.option('--port', default=26514, type=int)
-def cli_run(bind, port):
-    run(bind=bind, port=port)
+@click.option('--log-level', default='warning', 
+              type=click.Choice(['debug', 'info', 'warning', 'fatal'], case_sensitive=False))
+def cli_run(bind, port, log_level):
+    run(bind=bind, port=port, log_level=log_level)
