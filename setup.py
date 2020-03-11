@@ -57,8 +57,8 @@ setup(
         'Topic :: Communications',
     ],
     project_urls={
-        'Documentation': 'https://python-zencelium.readthedocs.io/',
-        'Changelog': 'https://python-zencelium.readthedocs.io/en/latest/changelog.html',
+        'Documentation': 'https://zencelium.readthedocs.io/',
+        'Changelog': 'https://zencelium.readthedocs.io/en/latest/changelog.html',
         'Issue Tracker': 'https://github.com/zentropi/python-zencelium/issues',
     },
     keywords=[
@@ -66,7 +66,11 @@ setup(
     ],
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
     install_requires=[
+        'bcrypt',
         'click',
+        'flask-wtf',
+        'quart',
+        'peewee'
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
     ],
     extras_require={
@@ -76,7 +80,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'zencelium = zencelium.cli:main',
+            'zencelium = zencelium.cli:cli',
         ]
     },
 )

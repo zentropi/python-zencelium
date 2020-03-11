@@ -1,0 +1,8 @@
+<a name="create_agent"><h3>Create Agent</h3></a>
+<form action="{{ url_for('agents') }}" method="POST">
+    <div>
+        <label for="name">Agent name:</label>
+        <input id="name" name="name" type="text" value="{{agent_name}}">
+        <button type="submit">Create Agent</button>
+    </div>
+</form>

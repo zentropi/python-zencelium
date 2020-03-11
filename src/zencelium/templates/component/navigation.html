@@ -1,0 +1,15 @@
+<nav>
+<ul class='navigation'>
+{% if session.logged_in %}
+    <li><a href="{{ url_for('index') }}">Home</a></li>
+    <li><a href="{{ url_for('agents') }}">Agents</a></li>
+    <li><a href="{{ url_for('spaces') }}">Spaces</a></li>
+    <li><a href="{{ url_for('console') }}">Console</a></li>
+    <li>{% include "form/logout_button.html" %}</li>
+{% else %}
+    <li><a href="{{ url_for('index') }}">Home</a></li>
+    <li><a href="{{ url_for('login') }}">Login</a></li>
+    <li><a href="{{ url_for('register') }}">Register</a></li>
+{% endif %}
+</ul>
+</nav>

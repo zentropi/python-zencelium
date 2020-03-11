@@ -1,0 +1,9 @@
+<form action="{{ url_for('space_join', name=space.name) }}" method="POST" class="inline-form">
+    <input name="space_name" type="hidden" value="{{space.name}}">
+    <select name="agent_name">
+    {% for agent in unjoined_agents %}    
+        <option value="{{agent.name}}">{{agent.name}}</option>
+    {% endfor %}
+    </select>
+    <button type="submit">join</button>
+</form>

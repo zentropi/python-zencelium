@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="{{ url_for('register', next=next_url or '/') }}" class="form-horizontal" method="post">
+    <div>
+        <label for="name">Account Name</label>
+        <input id="name" name="name" type="text" value="{{name}}">
+    <div>
+    </div>
+
+        <label for="display_name">Display Name</label>
+        <input id="display_name" name="display_name" type="text"  value="{{display_name}}">
+    <div>
+    </div>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password">
+    </div>
+    <div>
+        <button type="submit">Register</button>
+    </div>
+</form>
+{% endblock content %}

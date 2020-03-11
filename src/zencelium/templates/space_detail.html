@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>
+    <a href="{{ url_for('spaces') }}">Spaces</a> >
+    <a href="{{ url_for('space_detail', name=space.name) }}">{{space.name}}</a>
+</h3>
+<hr />
+<div>
+<label for="space_uuid">UUID:</label>
+<input name="space_uuid" type="text" value="{{space.uuid}}" />
+</div>
+<div>
+<label for="agents">Agents:</label>
+<ul>
+{% for agent in space.agents() %}
+    <li>{{agent.name}}      {% include "form/space_leave.html" %}</li>
+{% endfor %}
+</ul>
+</div>
+<hr />
+{% if unjoined_agents %}
+    {% include "form/space_join.html" %}
+{% else %}
+    All agents have joined space {{space.name}}.
+{% endif %}
+
+<hr />
+{% include "form/space_delete.html" %}
+{% endblock content %}

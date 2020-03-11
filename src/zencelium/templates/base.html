@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+    <title>{{ app_name }} - {% block title %}{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <style>
+        nav li {
+            display: inline;
+        }
+
+        .logout-form, .inline-form {
+            display: inline;
+        }
+    </style>
+    {% block head %}
+    {% endblock head %}
+</head>
+<body>
+{% include "component/navigation.html" %}
+<hr />
+<main>
+    <header>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    <div class="alert alert-{{ category }}">
+        <p>{{ message }}</p>
+    </div>
+    <header>
+    {% endfor %}
+    <article>
+        {% block content %}{% endblock %}
+    </article>
+</main>
+<hr />
+<footer>
+
+</footer>
+</body>
+</html>
