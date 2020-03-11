@@ -185,8 +185,14 @@ async def agent_join(account, name):
         agent = Agent.get(name=name)
         agent.join_space(space_name)
         spaces = list(agent.spaces())
-        await space_server.agent_spaces_update(agent, spaces)
-        await space_server.agent_join(agent, spaces)
+        try:
+            await space_server.agent_spaces_update(agent, spaces)
+        except KeyError:
+            pass
+        try:
+            await space_server.agent_join(agent, spaces)
+        except KeyError:
+            pass
         await flash_message(f'Agent {agent_name!r} joined {space_name!r}.', 'success')
     except Exception as e:
         logger.exception(e)
@@ -204,7 +210,10 @@ async def agent_leave(account, name):
     try:
         agent = Agent.get(name=agent_name)
         leave_space = agent.leave_space(space_name)
-        await space_server.agent_leave(agent, [leave_space])
+        try:
+            await space_server.agent_leave(agent, [leave_space])
+        except KeyError:
+            pass
         await flash_message(f'Agent {agent_name!r} left {space_name!r}.', 'success')
     except Exception as e:
         logger.exception(e)
@@ -221,6 +230,16 @@ async def spaces(account):
         name = form.get('name')
         try:
             space = account.create_space(name)
+            agent = account.account_agent()
+            agent.join_space(space.name)
+            try:
+                await space_server.agent_spaces_update(agent, [space])
+            except KeyError:
+                pass
+            try:
+                await space_server.agent_join(agent, [space])
+            except KeyError:
+                pass
             await flash_message(f'Space {name!r} created.', 'success')
             return redirect(url_for('space_detail', name=name))
         except Exception as e:
@@ -249,13 +268,22 @@ async def space_detail(account, name):
 @login_required
 async def space_delete(account, name):
     try:
+        agent = account.account_agent()
+        try:
+            leave_space = agent.leave_space(name)
+            try:
+                await space_server.agent_leave(agent, [leave_space])
+            except KeyError:
+                pass
+        except KeyError:
+            pass
         account.delete_space(name)
         await flash_message(f'Space {name!r} deleted.', 'success')
         return redirect(url_for('spaces'))
     except Exception as e:
         logger.exception(e)
         await flash_message(f'Space {name!r} was not deleted. {e}', 'danger')
-        return redirect(url_for('space_detail', name=mnme))
+        return redirect(url_for('space_detail', name=name))
 
 
 @app.route('/spaces/<name>/join/', methods=['POST'])
@@ -268,8 +296,14 @@ async def space_join(account, name):
         agent = Agent.get(name=agent_name)
         agent.join_space(space_name)
         spaces = list(agent.spaces())
-        await space_server.agent_spaces_update(agent, spaces)
-        await space_server.agent_join(agent, spaces)
+        try:
+            await space_server.agent_spaces_update(agent, spaces)
+        except KeyError:
+            pass
+        try:
+            await space_server.agent_join(agent, spaces)
+        except KeyError:
+            pass
         await flash_message(f'Agent {agent_name!r} joined {space_name!r}.', 'success')
     except Exception as e:
         logger.exception(e)
@@ -287,7 +321,10 @@ async def space_leave(account, name):
     try:
         agent = Agent.get(name=agent_name)
         leave_space = agent.leave_space(space_name)
-        await space_server.agent_leave(agent, [leave_space])
+        try:
+            await space_server.agent_leave(agent, [leave_space])
+        except KeyError:
+            pass
         await flash_message(f'Agent {agent_name!r} left {space_name!r}.', 'success')
     except Exception as e:
         logger.exception(e)
@@ -299,7 +336,11 @@ async def space_leave(account, name):
 @app.route('/console/')
 @login_required
 async def console(account):
-    return await render_template('console.html')
+    agent = account.account_agent()
+    return await render_template(
+        'console.html', 
+        agent_token=agent.token,
+        agent_spaces=agent.spaces())
 
 
 @app.websocket('/')

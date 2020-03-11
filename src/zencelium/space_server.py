@@ -66,6 +66,7 @@ class SpaceServer(object):
 
     async def broadcast(self, frame: Frame, spaces: Iterable[Space]):
         for space in spaces:
+            print(f'Sending frame {frame.name} to space {space.name}')
             await self.send_to_space(frame, space)
 
 

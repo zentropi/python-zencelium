@@ -114,8 +114,19 @@ class AgentServer(object):
             # await self.websocket_send(frame)
             await self.websocket.send(frame_as_json)
 
-    async def broadcast_send(self, frame: Frame):
-        await self.space_server.broadcast(frame, spaces=self.spaces)
+    async def broadcast_send(self, frame: Frame, spaces: Iterable[Space]):
+        meta = {'source': {
+                'name': self.agent.name,
+                # 'uuid': self.agent.uuid,
+            }}
+        if frame.meta:
+            frame._meta.update(meta)
+        else:
+            frame._meta = meta
+        if spaces:
+            await self.space_server.broadcast(frame, spaces=spaces)
+        else:
+            await self.space_server.broadcast(frame, spaces=self.spaces)
 
     async def login(self, token):
         agent = Agent.get_or_none(token=token)
@@ -155,8 +166,10 @@ class AgentServer(object):
         await self.websocket_send(frame.reply('login-ok'))
         print(f'Logged in agent {agent.name} for account {self.account.name}')
 
-    def _clean_space_names(self, frame: Frame):
-        space_names = frame.data.get('spaces')
+    def _clean_space_names(self, obj: dict):
+        space_names = obj.get('spaces')
+        if not space_names:
+            return []
         if isinstance(space_names, str):
             space_names = [s.strip() for s in space_names.split(',')]
         else:
@@ -169,7 +182,7 @@ class AgentServer(object):
 
     @on_command('join')
     async def cmd_join(self, frame: Frame):
-        space_names = self._clean_space_names(frame)
+        space_names = self._clean_space_names(frame.data)
         spaces = self._get_spaces_from_names(space_names)
         if '*' in space_names:
             spaces = self.spaces
@@ -180,7 +193,7 @@ class AgentServer(object):
 
     @on_command('leave')
     async def cmd_leave(self, frame: Frame):
-        space_names = self._clean_space_names(frame)
+        space_names = self._clean_space_names(frame.data)
         if '*' in space_names:
             spaces = self.spaces
         else:
@@ -188,6 +201,14 @@ class AgentServer(object):
         await self.leave(spaces)
         await self.websocket_send(frame.reply('leave-ok'))
 
+    @on_command('*')
+    async def cmd_relay(self, frame: Frame):
+        await self.websocket_send(frame.reply('unknown-command', data={'command': frame.name}))
+
     @on_event('*')
     async def evt_relay(self, frame: Frame):
-        await self.broadcast_send(frame)
+        spaces = []
+        if frame.meta and frame.meta.get('spaces'):
+            space_names = self._clean_space_names(frame.meta)
+            spaces = self._get_spaces_from_names(space_names)
+        await self.broadcast_send(frame, spaces=spaces)

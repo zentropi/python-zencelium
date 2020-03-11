@@ -76,7 +76,15 @@ class Account(Model):
             display_name=display_name or name,
             password=hashed_password)
         logger.critical(f'Account created: {account.name}')
+        account_agent = account.create_agent(name)
+        account_space = account.create_space(name)
         return account
+
+    def account_agent(self):
+        return Agent.get(name=self.name, account=self)
+
+    def account_space(self):
+        return Space.get(name=self.name, account=self)
 
     @staticmethod
     def delete_account(name: str) -> None:
@@ -95,10 +103,13 @@ class Account(Model):
         raise PermissionError(f'Login failed for {name}')
 
     def create_space(self, name) -> 'Space':
-        return Space.create(name=name, account=self)
+        space = Space.create(name=name, account=self)
+        # self.account_agent().join_space(space.name)
+        return space
 
     def delete_space(self, name) -> None:
         space = Space.get_or_none(name=name, account=self)
+        # self.account_agent().leave_space(space.name)
         if space is None:
             raise PermissionError(f'Cannot delete space {name!r} for account {self.name!r}')
         space.delete_instance()
