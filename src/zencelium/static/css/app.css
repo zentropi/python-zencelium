@@ -1,0 +1,86 @@
+img.logo, .logout-form, .inline-form {
+    display: inline-block;
+}
+
+body {
+    background-color: #fafafa;
+    margin: 0;
+    padding: 0;
+}
+
+nav {
+    background-color: #303030;
+    background-image: linear-gradient(#404040, #303030);
+}
+
+nav ul {
+    margin: 0;
+    padding: 0;
+    padding-left: 0.3rem;
+}
+
+nav li {
+    margin: 0;
+    padding-top: 0.5rem;
+    display: block;
+    text-align: center;
+    height: 2rem;
+}
+
+nav li.logo {
+    display: none;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    /* text-shadow: 2px 2px 2px #000; */
+    text-shadow: 1px 1px 3px #202020;
+}
+
+@media all and (min-width: 520px) {
+    nav {
+        display: grid;
+        /* align-items: center; */
+        grid-template: "navigation account-actions";
+    }
+    nav ul.navigation {
+        grid-area: navigation;
+    }
+
+    nav li {
+        /* height: 2rem; */
+        /* display: table-cell;
+        vertical-align: middle; */
+        /* display: inline-block; */
+        position: relative;
+        top: -0.8rem;
+        display: inline-block;
+        padding-right: 1.5rem;
+    }
+
+    nav li.logo {
+        /* display: table-cell; */
+        position: relative;
+        top: 0;
+        display: inline-block;
+        margin-top: 0;
+   }
+
+    img.logo {
+        margin-top: 0.4rem;
+    }
+
+    nav ul.account-actions {
+        width: 100%;
+        grid-area: account-actions;
+        text-align: right;
+    }
+
+    nav ul.account-actions li {
+        /* padding-top: 1.25rem; */
+        display: inline-block;
+        position: relative;
+        top: 0.7rem;
+    }
+}

@@ -6,21 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
-    <style>
-        nav li {
-            display: inline;
-        }
-
-        .logout-form, .inline-form {
-            display: inline;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.png') }}'" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}" type="image/x-icon">
     {% block head %}
     {% endblock head %}
 </head>
 <body>
 {% include "component/navigation.html" %}
-<hr />
 <main>
     <header>
     {% for category, message in get_flashed_messages(with_categories=true) %}
