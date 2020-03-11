@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from uuid import uuid4
 from typing import Iterable
 
@@ -15,6 +16,7 @@ from .models import Account
 from .space_server import space_server
 from .util import add_space_to_meta
 
+logger = logging.getLogger(__name__)
 
 def on_event(_name):
     def wrap(func):
@@ -123,16 +125,15 @@ class AgentServer(object):
             frame._meta.update(meta)
         else:
             frame._meta = meta
-        if spaces:
-            await self.space_server.broadcast(frame, spaces=spaces)
-        else:
-            await self.space_server.broadcast(frame, spaces=self.spaces)
+        if not spaces:
+            logger.warning(f'No spaces for broadcast for agent {self.agent.name}')
+        await self.space_server.broadcast(frame, spaces=spaces)
 
     async def login(self, token):
         agent = Agent.get_or_none(token=token)
         if agent:
             self.agent = agent
-            self.spaces = set(agent.spaces())
+            # self.spaces = set(agent.spaces())
             await space_server.agent_server_add(agent, self)
             channels = [self.receiver.channel(agent.uuid)]
             await self.redis.subscribe(*channels)
@@ -140,18 +141,24 @@ class AgentServer(object):
 
     async def join(self, spaces: Iterable[Space]):
         if not spaces:
-            print(f'No spaces to join for agent {self.agent}')
+            logger.debug(f'No spaces to join for agent {self.agent}')
             return
         channels = []
         for space in spaces:
+            self.spaces.add(space)
             channels.append(self.receiver.channel(space.uuid))
         await self.redis.subscribe(*channels)
 
     async def leave(self, spaces: Iterable[Space]):
+        if not spaces:
+            logger.debug(f'No spaces to leave for agent {self.agent}')
+            return
         channels = []
         for space in spaces:
+            self.spaces.remove(space)
             channels.append(self.receiver.channel(space.uuid))
-        await self.redis.unsubscribe(*channels)
+        if channels:
+            await self.redis.unsubscribe(*channels)
 
     @on_command('login')
     async def cmd_login(self, frame: Frame):
@@ -159,12 +166,12 @@ class AgentServer(object):
         agent = await self.login(token)
         if not token or not agent:
             await self.websocket_send(frame.reply('login-failed'))
-            print(f'Login failed for {frame.data}')
+            logger.info(f'Login failed for {frame.data}')
             await self.stop()
             return
         self.account = agent.account
         await self.websocket_send(frame.reply('login-ok'))
-        print(f'Logged in agent {agent.name} for account {self.account.name}')
+        logger.info(f'Logged in agent {agent.name} for account {self.account.name}')
 
     def _clean_space_names(self, obj: dict):
         space_names = obj.get('spaces')
@@ -177,7 +184,11 @@ class AgentServer(object):
         return space_names
 
     def _get_spaces_from_names(self, space_names):
-        spaces = [s for s in self.spaces if s.name in space_names]
+        spaces = (Space.select()
+            .where(
+                Space.name.in_(space_names),
+                Space.account == self.account
+            ))
         return spaces
 
     @on_command('join')
@@ -185,7 +196,7 @@ class AgentServer(object):
         space_names = self._clean_space_names(frame.data)
         spaces = self._get_spaces_from_names(space_names)
         if '*' in space_names:
-            spaces = self.spaces
+            spaces = list(self.agent.spaces())
         else:
             spaces = self._get_spaces_from_names(space_names)
         await self.join(spaces)
@@ -207,7 +218,7 @@ class AgentServer(object):
 
     @on_event('*')
     async def evt_relay(self, frame: Frame):
-        spaces = []
+        spaces = self.spaces
         if frame.meta and frame.meta.get('spaces'):
             space_names = self._clean_space_names(frame.meta)
             spaces = self._get_spaces_from_names(space_names)
