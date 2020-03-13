@@ -389,7 +389,6 @@ async def console(account):
     agent = account.account_agent()
     return await render_template(
         'console.html',
-        agent_token=agent.token,
         agent_spaces=agent.spaces())
 
 

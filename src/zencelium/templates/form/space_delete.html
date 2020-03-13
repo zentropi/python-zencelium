@@ -1,4 +1,5 @@
-<form action="{{ url_for('space_delete', name=space.name) }}" method="POST" class="inline-form">
+<form action="{{ url_for('space_delete', name=space.name) }}" method="POST" class="delete-form">
     <input id="name" name="name" type="hidden" value="{{space.name}}">
-    <button type="submit">delete {{space.name}}</button>
+    <label for="delete">Delete {{space.name}}</label>
+    <button type="submit">delete</button>
 </form>

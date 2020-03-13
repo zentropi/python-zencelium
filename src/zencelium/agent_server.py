@@ -6,6 +6,7 @@ from typing import Iterable
 from aioredis import create_redis
 from aioredis import pubsub
 from asgiref.sync import async_to_sync
+from quart import session
 
 from zentropi import Frame
 from zentropi import Kind
@@ -56,11 +57,12 @@ class AgentServer(object):
                 self._handlers_event[getattr(attr, 'handle_event')] = attr
             if getattr(attr, 'handle_command', None):
                 self._handlers_command[getattr(attr, 'handle_command')] = attr
-    
+
     async def start(self):
         self.connected = True
         self.redis = await create_redis('redis://localhost')
         try:
+            await self._session_login()
             ws_recv_loop = asyncio.create_task(self.websocket_recv())
             bc_recv_loop = asyncio.create_task(self.broadcast_recv())
             self.receive_loops = (ws_recv_loop, bc_recv_loop)
@@ -99,7 +101,6 @@ class AgentServer(object):
             raise KeyError(f'Unknown kind {kind} in {name}')
         await handler(frame)
 
-
     async def websocket_recv(self):
         while self.connected:
             frame = Frame.from_json(await self.websocket.receive())
@@ -128,6 +129,18 @@ class AgentServer(object):
         if not spaces:
             logger.warning(f'No spaces for broadcast for agent {self.agent.name}')
         await self.space_server.broadcast(frame, spaces=spaces)
+
+    async def _session_login(self):
+        logged_in = session.get("logged_in")
+        account_name = session.get("account_name")
+        if logged_in:
+            logger.info(f'*** session-account: {account_name}')
+            account = Account.get(name=account_name)
+            agent = account.account_agent()
+            self.agent = agent
+            self.account = account
+            await self.login(token=agent.token)
+            await self.websocket_send(Frame('login-ok', kind=Kind.COMMAND))
 
     async def login(self, token):
         agent = Agent.get_or_none(token=token)

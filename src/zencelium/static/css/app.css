@@ -2,6 +2,10 @@
     padding: 0 1rem;
 }
 
+.inline-form {
+    display: inline;
+}
+
 /* Navigation >>> */
 
 nav {
@@ -144,3 +148,180 @@ section.list_card a {
 }
 
 /* <<< List Card */
+
+/* Detail Card >>> */
+
+.detail_card {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(auto-fit, 1fr);
+    grid-gap: 1rem;
+    background-color: whitesmoke;
+    border: 1px solid gray;
+    padding: 1rem;
+}
+
+.detail_card div input {
+    width: 32rem;
+}
+
+.detail_card ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: grid;
+    grid-template-rows: repeat(auto-fit, 1fr);
+    width: 100%;
+    grid-gap: 0.6rem;
+    border: 1px solid lightskyblue;
+}
+
+.detail_card ul li {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 0.6rem;
+    align-items: center;
+    padding-left: 0 1rem;
+}
+
+.detail_card ul li:nth-child(odd) {
+    background-color: #ececec;
+}
+
+.detail_card ul li:nth-child(even) {
+    background-color: #cccccc;
+}
+
+.detail_card ul li span {
+    justify-self: start;
+}
+
+.detail_card ul li form {
+    justify-self: end;
+}
+
+.detail_card .join-form {
+    padding: 2rem 1rem;
+    background-color: #ccffcc;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-gap: 0.6rem;
+}
+
+.detail_card .join-form-empty {
+    padding: 2rem 1rem;
+    background-color: #ccffcc;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-gap: 0.6rem;
+}
+
+.detail_card .delete-form {
+    padding: 2rem 1rem;
+    background-color: #ffcccc;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-gap: 0.6rem;
+}
+
+.detail_card .delete-form button {
+    max-width: 16rem;
+}
+
+@media all and (min-width: 520px) {
+
+    .detail_card .join-form {
+        padding: 2rem 1rem;
+        background-color: #ccffcc;
+        display: grid;
+        grid-template-columns: min-content 16rem min-content;
+        grid-template-rows: 1fr;
+        grid-gap: 0.6rem;
+        align-items: center;
+    }
+    
+}
+
+/* <<< Detail Card */
+
+/* Console >>> */
+
+section.console {
+    display: grid;
+    grid-template-rows: max-content 1fr;
+    grid-template-columns: repeat(auto-fit, 1fr);
+    align-items: center;
+    grid-gap: 0.5rem;
+}
+
+section.console label {
+    display: inline-block;
+}
+
+section.console .console_form {
+    border-top: 1px solid lightgray;
+    padding-top: 1rem;
+}
+
+section.console .console_form {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(auto-fit, 1fr);
+    align-items: center;
+    grid-gap: 0.5rem;
+}
+
+section.console ul {
+    list-style: none;
+    margin: 0;
+    padding: 1rem 0;
+    line-height: 1.6rem;
+}
+
+section.console input {
+    max-width: 100%;
+}
+
+@media all and (min-width: 520px) {
+
+    section.console {
+        display: grid;
+        height: calc(100vh - 9rem);
+        grid-template-rows: 1fr 3rem;
+        grid-gap: 1rem;
+    }
+
+    section.console ul {
+        height: 100%;
+    }
+
+    section.console label {
+        display: none;
+    }
+
+    section.console .console_form {
+        display: grid;
+        grid-template-columns: 2fr 2fr 6fr 1fr;
+        grid-template-rows: 1fr;
+        align-items: center;
+        grid-gap: 0.5rem;
+    }
+    
+}
+
+@media all and (min-width: 1000px) {
+
+    section.console label {
+        display: block;
+    }
+
+    section.console .console_form {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr 2fr 1fr 16fr 1fr;
+        grid-template-rows: 1fr;
+        align-items: center;
+        grid-gap: 0.5rem;
+    }
+}
+
+/* <<< Console */
