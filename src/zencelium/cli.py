@@ -17,6 +17,7 @@ Why does this file exist, and why not put this in __main__?
 import click
 from .web import run
 
+
 @click.group()
 def cli():
     pass

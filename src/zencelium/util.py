@@ -1,3 +1,10 @@
+import datetime
+
+
+def timestamp():
+    return datetime.datetime.utcnow().isoformat()
+
+
 def add_space_to_meta(frame, space_name, space_uuid):
     space_meta = {'space': {
         # 'uuid': space_uuid, 

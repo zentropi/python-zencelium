@@ -252,6 +252,11 @@ section.console {
     grid-template-columns: repeat(auto-fit, 1fr);
     align-items: center;
     grid-gap: 0.5rem;
+    /* margin-bottom: 2rem; */
+}
+
+#console_log {
+    overflow-y: scroll;
 }
 
 section.console label {
@@ -276,6 +281,7 @@ section.console ul {
     margin: 0;
     padding: 1rem 0;
     line-height: 1.6rem;
+    font-family: 'Courier New', Courier, monospace;
 }
 
 section.console input {
@@ -325,3 +331,50 @@ section.console input {
 }
 
 /* <<< Console */
+
+/* Console Frames >>> */
+
+
+.frame-kind {
+    font-weight: bold;
+}
+
+.frame-kind-event {
+    color: darkgreen;
+}
+
+.frame-kind-command {
+    color: darkslateblue;
+}
+
+.frame-name {
+    color: purple;
+    font-weight: bold;
+}
+
+.frame-data {
+    color: brown;
+}
+
+.frame-meta {
+    color: chocolate;
+}
+
+.frame-meta-source {
+    color: darkmagenta;
+}
+
+.frame-meta-space {
+    color: indigo;
+}
+
+@media all and (min-width: 1000px) {
+
+    section.console ul li {
+        display: grid;
+        grid-template-columns: 1rem 3fr 3fr 10fr;
+    }
+    
+}
+
+/* <<< Console Frames */
