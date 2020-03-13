@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Agents</h2>
+<h2>Agents [<a href="{{ url_for('agent_create') }}">create</a>]</h2>
 
 {% if not agents %}
     <em>No agents created yet.</em>
 {% else %}
-    {% for agent in agents %}
-        <h3><a href="{{ url_for('agent_detail', name=agent.name) }}">{{agent.name}}</a></h3>
-    {% endfor %}
+    <section class="list_cards">
+        {% for agent in agents %}
+            {% include "component/agent_card.html" %}
+        {% endfor %}
+    </section>
 {% endif %}
-<hr />
-{% include "form/agent_create.html" %}
 {% endblock content %}

@@ -1,3 +1,4 @@
+import logging
 from typing import Iterable
 from aioredis import create_redis
 from aioredis import pubsub
@@ -10,6 +11,8 @@ from .models import Agent
 from .models import Space
 from .models import Account
 from .util import add_space_to_meta
+
+logger = logging.getLogger(__name__)
 
 
 class SpaceServer(object):
@@ -66,7 +69,7 @@ class SpaceServer(object):
 
     async def broadcast(self, frame: Frame, spaces: Iterable[Space]):
         for space in spaces:
-            print(f'Sending frame {frame.name} to space {space.name}')
+            logger.debug(f'Sending frame {frame.name} to space {space.name}')
             await self.send_to_space(frame, space)
 
 

@@ -1,15 +1,16 @@
 <nav>
-<ul class='navigation'>
-{% if session.logged_in %}
-    <li><a href="{{ url_for('index') }}">Home</a></li>
-    <li><a href="{{ url_for('agents') }}">Agents</a></li>
-    <li><a href="{{ url_for('spaces') }}">Spaces</a></li>
-    <li><a href="{{ url_for('console') }}">Console</a></li>
-    <li>{% include "form/logout_button.html" %}</li>
-{% else %}
-    <li><a href="{{ url_for('index') }}">Home</a></li>
-    <li><a href="{{ url_for('login') }}">Login</a></li>
-    <li><a href="{{ url_for('register') }}">Register</a></li>
-{% endif %}
+<ul>
+    <li><img src="{{ url_for('static', filename='images/logo.png') }}"
+        height="32" width="32" alt="Home" class="logo" /></li>
+    <li class="nav-link"><a href="{{ url_for('index') }}">Home</a></li>
+    {% if session.logged_in %}
+        <li><a href="{{ url_for('agents') }}">Agents</a></li>
+        <li><a href="{{ url_for('spaces') }}">Spaces</a></li>
+        <li><a href="{{ url_for('console') }}">Console</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    {% else %}
+        <li><a href="{{ url_for('register') }}">Register</a></li>
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+    {% endif %}
 </ul>
 </nav>

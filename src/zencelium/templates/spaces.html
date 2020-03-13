@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Spaces</h2>
+<h2>Spaces [<a href="{{ url_for('space_create') }}">create</a>]</h2>
 
 {% if not spaces %}
     <em>No spaces created yet.</em>
 {% else %}
-    {% for space in spaces %}
-        <h3><a href="{{ url_for('space_detail', name=space.name) }}">{{space.name}}</a></h3>
-    {% endfor %}
+    <section class="list_cards">
+        {% for space in spaces %}
+            {% include "component/space_card.html" %}
+        {% endfor %}
+    </section>
 {% endif %}
-<hr />
-{% include "form/space_create.html" %}
 {% endblock content %}
