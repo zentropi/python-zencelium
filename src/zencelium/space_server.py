@@ -22,7 +22,7 @@ class SpaceServer(object):
     async def init(self):
         self.publisher = await create_redis('redis://localhost')
 
-    async def agent_server_add(self, agent: Agent, agent_server: 'AgentServer'):
+    async def agent_server_add(self, agent: Agent, agent_server):
         if agent.uuid in self.agent_servers:
             raise ConnectionError(f'Agent {agent.name} is already connected.')
         self.agent_servers.update({agent.uuid: agent_server})

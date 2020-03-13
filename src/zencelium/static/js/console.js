@@ -9,12 +9,12 @@ var kind_icon = {
 }
 
 var console_log = document.getElementById('console_log');
-var should_scroll = false;
+// var should_scroll = false;
 
 frame_kind_to_html = function (frame) {
     var span = document.createElement('span');
     span.classList.add('frame-kind');
-    span.classList.add('kind-' + kind_map[frame.kind]);
+    span.classList.add('frame-kind-' + kind_map[frame.kind]);
     var text = document.createTextNode(kind_icon[frame.kind]);
     span.appendChild(text);
     span.appendChild(document.createTextNode(" "));
@@ -24,7 +24,7 @@ frame_kind_to_html = function (frame) {
 frame_name_to_html = function (frame) {
     var span = document.createElement('span');
     span.classList.add('frame-name');
-    span.classList.add('kind-' + kind_map[frame.kind]);
+    span.classList.add('frame-kind-' + kind_map[frame.kind]);
     var text = document.createTextNode(frame.name);
     span.appendChild(text);
     span.appendChild(document.createTextNode(" "));
@@ -91,20 +91,21 @@ frame_to_json = function (frame) {
 
 append_to_log = function (frame) {
     var frame_as_html = frame_to_html(frame)
-    console_log.appendChild(frame_as_html);
-    if (should_scroll) {
-        window.scrollTo(0, document.body.scrollHeight);
-    };
+    last = console_log.appendChild(frame_as_html);
+    // if (should_scroll) {
+        // window.scrollTo(0, document.body.scrollHeight);
+        last.scrollIntoView();
+    // };
 };
 
-window.onscroll = function(event) {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-        should_scroll = true;
-    }
-    else {
-        should_scroll = false;
-    };
-};
+// window.onscroll = function(event) {
+//     if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+//         should_scroll = true;
+//     }
+//     else {
+//         should_scroll = false;
+//     };
+// };
 
 var ws = new WebSocket('ws://' + document.domain + ':' + location.port + '/');
 
@@ -131,7 +132,7 @@ button.onclick = function() {
     var ckind = document.getElementById('console_kind');
     var kind = Number(ckind.options[ckind.selectedIndex].value);
     var frame = {"kind": kind, "name": content, "meta": {"spaces": space_name}};
-    console.log(frame)
+    // console.log(frame)
     ws.send(frame_to_json(frame));
     input.select();
 };

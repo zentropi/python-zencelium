@@ -16,8 +16,10 @@ from .models import Space
 from .models import Account
 from .space_server import space_server
 from .util import add_space_to_meta
+from .util import timestamp
 
 logger = logging.getLogger(__name__)
+
 
 def on_event(_name):
     def wrap(func):
@@ -121,7 +123,9 @@ class AgentServer(object):
         meta = {'source': {
                 'name': self.agent.name,
                 # 'uuid': self.agent.uuid,
-            }}
+            },
+            'timestamp': timestamp(),
+        }
         if frame.meta:
             frame._meta.update(meta)
         else:
@@ -140,7 +144,9 @@ class AgentServer(object):
             self.agent = agent
             self.account = account
             await self.login(token=agent.token)
-            await self.websocket_send(Frame('login-ok', kind=Kind.COMMAND))
+            frame = Frame('login-ok', kind=Kind.COMMAND)
+            add_space_to_meta(frame, 'server', 'server')
+            await self.websocket_send(frame)
 
     async def login(self, token):
         agent = Agent.get_or_none(token=token)
@@ -183,7 +189,9 @@ class AgentServer(object):
             await self.stop()
             return
         self.account = agent.account
-        await self.websocket_send(frame.reply('login-ok'))
+        reply = frame.reply('login-ok')
+        add_space_to_meta(reply, 'server', 'server')
+        await self.websocket_send(reply)
         logger.info(f'Logged in agent {agent.name} for account {self.account.name}')
 
     def _clean_space_names(self, obj: dict):
@@ -213,7 +221,9 @@ class AgentServer(object):
         else:
             spaces = self._get_spaces_from_names(space_names)
         await self.join(spaces)
-        await self.websocket_send(frame.reply('join-ok'))
+        reply = frame.reply('join-ok')
+        add_space_to_meta(reply, 'server', 'server')
+        await self.websocket_send(reply)
 
     @on_command('leave')
     async def cmd_leave(self, frame: Frame):
