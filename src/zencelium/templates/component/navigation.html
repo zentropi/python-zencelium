@@ -1,26 +1,16 @@
 <nav>
-
-<ul class='account-actions'>
+<ul>
+    <li><img src="{{ url_for('static', filename='images/logo.png') }}"
+        height="32" width="32" alt="Home" class="logo" /></li>
+    <li class="nav-link"><a href="{{ url_for('index') }}">Home</a></li>
     {% if session.logged_in %}
-        <li class="link account-action"><a href="{{ url_for('logout') }}">Logout</a></li>
+        <li><a href="{{ url_for('agents') }}">Agents</a></li>
+        <li><a href="{{ url_for('spaces') }}">Spaces</a></li>
+        <li><a href="{{ url_for('console') }}">Console</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
     {% else %}
-        <li class="link account-action"><a href="{{ url_for('register') }}">Register</a></li>
-        <li class="link account-action"><a href="{{ url_for('login') }}">Login</a></li>
+        <li><a href="{{ url_for('register') }}">Register</a></li>
+        <li><a href="{{ url_for('login') }}">Login</a></li>
     {% endif %}
 </ul>
-<ul class='navigation'>
-    <li class="logo">
-        <a href="{{ url_for('index') }}"><img 
-            src="{{ url_for('static', filename='images/logo-reversed.png') }}" 
-            height="32" width="32" alt="zentropi logo" class="logo" /></a>
-    </li>
-
-    <li class="link"><a href="{{ url_for('index') }}">Home</a></li>
-    {% if session.logged_in %}
-        <li class="link"><a href="{{ url_for('agents') }}">Agents</a></li>
-        <li class="link"><a href="{{ url_for('spaces') }}">Spaces</a></li>
-        <li class="link"><a href="{{ url_for('console') }}">Console</a></li>
-    {% endif %}
-</ul>
-
 </nav>

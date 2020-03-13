@@ -1,0 +1,21 @@
+{% extends "component/list_card.html" %}
+{% block name %}
+<a href="{{ url_for('agents') }}">Agents</a>
+{% endblock name %}
+
+## {% block info %}
+## Agents do things for you.
+## {% endblock info %}
+
+{% block extra %}
+    {% with count=account.agents.count() %}
+        {{ count }} agent{{count|plural}}
+    {% endwith %}
+{% endblock extra %}
+
+## {% block extra_detail %}
+##     <ul>
+##         <li>0 Online</li>
+##         <li>0 Offline</li>
+##     </ul>
+## {% endblock extra_detail %}

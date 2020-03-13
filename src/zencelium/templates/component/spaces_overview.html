@@ -1,0 +1,21 @@
+{% extends "component/list_card.html" %}
+{% block name %}
+<a href="{{ url_for('spaces') }}">Spaces</a>
+{% endblock name %}
+
+## {% block info %}
+## Spaces let agents communicate.
+## {% endblock info %}
+
+{% block extra %}
+    {% with count=account.spaces.count() %}
+        {{ count }} space{{count|plural}}
+    {% endwith %}
+{% endblock extra %}
+
+## {% block extra_detail %}
+##     <ul>
+##         <li>0 Online</li>
+##         <li>0 Offline</li>
+##     </ul>
+## {% endblock extra_detail %}

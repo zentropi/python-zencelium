@@ -1,0 +1,26 @@
+{% extends "component/list_card.html" %}
+{% block name %}
+    <a href="{{ url_for('agent_detail', name=agent.name) }}" class="agent_card_link">
+        {{agent.name}}
+    </a>
+{% endblock name %}
+
+{% block info %}
+    <ul>
+        <li>Online</li>
+    </ul>
+{% endblock info %}
+
+{% block extra %}
+    {% with count=agent.spaces().count() %}
+        {{ count }} space{{count|plural}}
+    {% endwith %}
+{% endblock extra %}
+
+{% block extra_detail %}
+    <ul>
+        {% for space in agent.spaces() %}
+        <li>{{ space.name }}</li>
+        {% endfor %}
+    </ul>
+{% endblock extra_detail %}

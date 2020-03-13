@@ -59,7 +59,9 @@ class Config(BaseConfig):
 config = Config(app_name=f'{__app_name__}', config_path=CONFIG_PATH)
 config.init()
 
+
 app = Quart(f'{__app_name__}')
+# app.jinja_env.extensions = ['jinja2.ext.i18n']
 app.jinja_env.line_statement_prefix = '@'
 app.jinja_env.line_comment_prefix = '##'
 app.secret_key = config.secret_key
@@ -77,6 +79,14 @@ def login_required(fn):
     return inner
 
 
+@app.template_filter('plural')
+def plural(number, singular = '', plural = 's'):
+    if number == 1:
+        return singular
+    else:
+        return plural
+
+
 @app.before_serving
 async def startup():
     db_init('zencelium.db')
@@ -91,6 +101,9 @@ def shutdown():
 
 @app.route('/')
 async def index():
+    if session.get('logged_in'):
+        account = Account.get(name=session['account_name'])
+        return await render_template('index.html', account=account)
     return await render_template('index.html')
 
 
@@ -114,6 +127,7 @@ async def register():
             account = Account.login_account(name, password)
             session['logged_in'] = True
             session['account_name'] = name
+            session['display_name'] = account.display_name
             session.permanent = True
             await flash_message(f'Registered account {name!r} and logged in.')
             return redirect(url_for('index'))
@@ -134,6 +148,7 @@ async def login():
             account = Account.login_account(name, password)
             session['logged_in'] = True
             session['account_name'] = name
+            session['display_name'] = account.display_name
             session.permanent = True
             await flash_message(f'Welcome {account.display_name}')
             return redirect(url_for('index'))
@@ -155,9 +170,17 @@ async def logout(account):
     return await render_template('logout.html')
 
 
-@app.route('/agents/', methods=['GET', 'POST'])
+@app.route('/agents/')
 @login_required
 async def agents(account):
+    agents = account.agents
+    return await render_template(
+        'agents.html', agents=agents)
+
+
+@app.route('/agents/create/', methods=['GET', 'POST'])
+@login_required
+async def agent_create(account):
     if request.method == 'POST':
         form = await request.form
         name = form.get('name')
@@ -168,9 +191,8 @@ async def agents(account):
         except Exception as e:
             logger.exception(e)
             await flash_message(f'Agent {name!r} was not created.', 'danger')
-    agents = account.agents
     return await render_template(
-        'agents.html', agents=agents)
+        'agent_create.html', agents=agents)
 
 
 @app.route('/agents/<name>/', methods=['GET', 'POST'])
@@ -214,10 +236,6 @@ async def agent_join(account, name):
         agent = Agent.get(name=name)
         agent.join_space(space_name)
         spaces = list(agent.spaces())
-        # try:
-        #     await space_server.agent_spaces_update(agent, spaces)
-        # except KeyError:
-        #     pass
         try:
             await space_server.agent_join(agent, spaces)
         except KeyError:
@@ -251,9 +269,17 @@ async def agent_leave(account, name):
         return redirect(url_for('agent_detail', name=name))
 
 
-@app.route('/spaces/', methods=['GET', 'POST'])
+@app.route('/spaces/')
 @login_required
 async def spaces(account):
+    spaces = account.spaces
+    return await render_template(
+        'spaces.html', spaces=spaces)
+
+
+@app.route('/spaces/create/', methods=['GET', 'POST'])
+@login_required
+async def space_create(account):
     if request.method == 'POST':
         form = await request.form
         name = form.get('name')
@@ -261,10 +287,6 @@ async def spaces(account):
             space = account.create_space(name)
             agent = account.account_agent()
             agent.join_space(space.name)
-            # try:
-            #     await space_server.agent_spaces_update(agent, [space])
-            # except KeyError:
-            #     pass
             try:
                 await space_server.agent_join(agent, [space])
             except KeyError:
@@ -274,9 +296,8 @@ async def spaces(account):
         except Exception as e:
             logger.exception(e)
             await flash_message(f'Space {name!r} was not created.', 'danger')
-    spaces = account.spaces
     return await render_template(
-        'spaces.html', spaces=spaces)
+        'space_create.html')
 
 
 @app.route('/spaces/<name>/', methods=['GET', 'POST'])
