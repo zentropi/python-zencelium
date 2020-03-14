@@ -24,21 +24,21 @@ logger = logging.getLogger(__name__)
 def on_event(_name):
     def wrap(func):
         setattr(func, 'handle_event', _name)
-        return func 
+        return func
     return wrap
 
 
 def on_command(_name):
     def wrap(func):
         setattr(func, 'handle_command', _name)
-        return func 
+        return func
     return wrap
 
 
 def on_message(_name):
     def wrap(func):
         setattr(func, 'handle_message', _name)
-        return func 
+        return func
     return wrap
 
 
@@ -56,6 +56,8 @@ class AgentServer(object):
         self._handlers_event = {}
         self._handlers_message = {}
         self.space_server = space_server
+        self._filter_event_names = {'*'}
+        self._filter_message_names = {'*'}
         self.load_handlers()
 
     def load_handlers(self):
@@ -132,9 +134,23 @@ class AgentServer(object):
         spaces = self.receiver
         while await spaces.wait_message():
             _, frame_as_json = await spaces.get(encoding='utf-8')
-            # frame = Frame.from_json(frame_as_json)
-            # await self.websocket_send(frame)
-            await self.websocket.send(frame_as_json)
+            frame = Frame.from_json(frame_as_json)
+            logger.warning(f'Recv bcast {frame.to_dict()}')
+            if frame.kind == Kind.EVENT:
+                if '*' in self._filter_event_names:
+                    await self.websocket_send(frame)
+                    continue
+                elif frame.name in self._filter_event_names:
+                    await self.websocket_send(frame)
+                    continue
+            elif frame.kind == Kind.MESSAGE:
+                if '*' in self._filter_message_names:
+                    await self.websocket_send(frame)
+                    continue
+                elif frame.name in self._filter_message_names:
+                    await self.websocket_send(frame)
+                    continue
+            logger.warning(f'Skipping frame: {frame.name} for agent {self.agent.name}')
 
     async def broadcast_send(self, frame: Frame, spaces: Iterable[Space]):
         meta = {'source': {
@@ -251,6 +267,15 @@ class AgentServer(object):
             spaces = self._get_spaces_from_names(space_names)
         await self.leave(spaces)
         await self.websocket_send(frame.reply('leave-ok'))
+
+    @on_command('filter')
+    async def cmd_filter(self, frame: Frame):
+        if not frame.data.get('names'):
+            await self.websocket_send(
+                frame.reply('filters-failed', data={'error': 'Expected {"names": {"event": [...], "message": [...], ...}}'}))
+            return
+        self._filter_event_names = set(frame.data['names'].get('event', []))
+        self._filter_message_names = set(frame.data['names'].get('message', []))
 
     @on_command('*')
     async def cmd_unknown(self, frame: Frame):
