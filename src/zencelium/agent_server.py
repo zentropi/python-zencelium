@@ -43,6 +43,20 @@ def on_message(_name):
     return wrap
 
 
+def on_request(_name):
+    def wrap(func):
+        setattr(func, 'handle_request', _name)
+        return func
+    return wrap
+
+
+def on_response(_name):
+    def wrap(func):
+        setattr(func, 'handle_response', _name)
+        return func
+    return wrap
+
+
 class AgentServer(object):
     def __init__(self, websocket):
         self.websocket = websocket
@@ -56,9 +70,12 @@ class AgentServer(object):
         self._handlers_command = {}
         self._handlers_event = {}
         self._handlers_message = {}
+        self._handlers_request = {}
+        self._handlers_response = {}
         self.space_server = space_server
         self._filter_event_names = {'*'}
         self._filter_message_names = {'*'}
+        self._filter_request_names = {'*'}
         self.load_handlers()
         self._frame_max_size = 1 * KB
 
@@ -73,6 +90,10 @@ class AgentServer(object):
                 self._handlers_command[getattr(attr, 'handle_command')] = attr
             elif getattr(attr, 'handle_message', None):
                 self._handlers_message[getattr(attr, 'handle_message')] = attr
+            elif getattr(attr, 'handle_request', None):
+                self._handlers_request[getattr(attr, 'handle_request')] = attr
+            elif getattr(attr, 'handle_response', None):
+                self._handlers_response[getattr(attr, 'handle_response')] = attr
 
     async def start(self):
         self.connected = True
@@ -120,6 +141,20 @@ class AgentServer(object):
                 handler = self._handlers_message['*']
             else:
                 return
+        elif kind == Kind.REQUEST:
+            if name in self._handlers_request:
+                handler = self._handlers_request[name]
+            elif '*' in self._handlers_request:
+                handler = self._handlers_request['*']
+            else:
+                return
+        elif kind == Kind.RESPONSE:
+            if name in self._handlers_response:
+                handler = self._handlers_response[name]
+            elif '*' in self._handlers_response:
+                handler = self._handlers_response['*']
+            else:
+                return
         else:
             raise KeyError(f'Unknown kind {kind} in {name}')
         await handler(frame)
@@ -159,6 +194,13 @@ class AgentServer(object):
                 elif frame.name in self._filter_message_names:
                     await self.websocket_send(frame)
                     continue
+            elif frame.kind == Kind.REQUEST or frame.kind == Kind.RESPONSE:
+                if '*' in self._filter_request_names:
+                    await self.websocket_send(frame)
+                    continue
+                elif frame.name in self._filter_request_names:
+                    await self.websocket_send(frame)
+                    continue
             logger.info(f'Skipping frame: {frame.name} for agent {self.agent.name}')
 
     async def broadcast_send(self, frame: Frame, spaces: Iterable[Space]):
@@ -168,6 +210,10 @@ class AgentServer(object):
             },
             'timestamp': timestamp(),
         }
+        # ensure outgoig requests get responses
+        if frame.kind == Kind.REQUEST:
+            if frame.name not in self._filter_request_names:
+                self._filter_request_names.add(frame.name)
         if frame.meta:
             frame._meta.update(meta)
         else:
@@ -285,6 +331,7 @@ class AgentServer(object):
         if frame.data.get('names'):
             self._filter_event_names = set(frame.data['names'].get('event', []))
             self._filter_message_names = set(frame.data['names'].get('message', []))
+            self._filter_request_names = set(frame.data['names'].get('request', []))
 
         await self.websocket_send(frame.reply('filter-ok'))
 
@@ -303,6 +350,22 @@ class AgentServer(object):
 
     @on_message('*')
     async def msg_relay(self, frame: Frame):
+        spaces = self.spaces
+        if frame.meta and frame.meta.get('spaces'):
+            space_names = self._clean_space_names(frame.meta)
+            spaces = self._get_spaces_from_names(space_names)
+        await self.broadcast_send(frame, spaces=spaces)
+
+    @on_request('*')
+    async def req_relay(self, frame: Frame):
+        spaces = self.spaces
+        if frame.meta and frame.meta.get('spaces'):
+            space_names = self._clean_space_names(frame.meta)
+            spaces = self._get_spaces_from_names(space_names)
+        await self.broadcast_send(frame, spaces=spaces)
+
+    @on_response('*')
+    async def resp_relay(self, frame: Frame):
         spaces = self.spaces
         if frame.meta and frame.meta.get('spaces'):
             space_names = self._clean_space_names(frame.meta)
