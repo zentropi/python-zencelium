@@ -35,6 +35,13 @@ def on_command(_name):
     return wrap
 
 
+def on_message(_name):
+    def wrap(func):
+        setattr(func, 'handle_message', _name)
+        return func 
+    return wrap
+
+
 class AgentServer(object):
     def __init__(self, websocket):
         self.websocket = websocket
@@ -47,6 +54,7 @@ class AgentServer(object):
         self.receive_loops = tuple()  # set by start()
         self._handlers_command = {}
         self._handlers_event = {}
+        self._handlers_message = {}
         self.space_server = space_server
         self.load_handlers()
 
@@ -57,8 +65,10 @@ class AgentServer(object):
                 continue
             if getattr(attr, 'handle_event', None):
                 self._handlers_event[getattr(attr, 'handle_event')] = attr
-            if getattr(attr, 'handle_command', None):
+            elif getattr(attr, 'handle_command', None):
                 self._handlers_command[getattr(attr, 'handle_command')] = attr
+            elif getattr(attr, 'handle_message', None):
+                self._handlers_message[getattr(attr, 'handle_message')] = attr
 
     async def start(self):
         self.connected = True
@@ -97,6 +107,13 @@ class AgentServer(object):
                 handler = self._handlers_event[name]
             elif '*' in self._handlers_event:
                 handler = self._handlers_event['*']
+            else:
+                return
+        elif kind == Kind.MESSAGE:
+            if name in self._handlers_message:
+                handler = self._handlers_message[name]
+            elif '*' in self._handlers_message:
+                handler = self._handlers_message['*']
             else:
                 return
         else:
@@ -241,6 +258,14 @@ class AgentServer(object):
 
     @on_event('*')
     async def evt_relay(self, frame: Frame):
+        spaces = self.spaces
+        if frame.meta and frame.meta.get('spaces'):
+            space_names = self._clean_space_names(frame.meta)
+            spaces = self._get_spaces_from_names(space_names)
+        await self.broadcast_send(frame, spaces=spaces)
+
+    @on_message('*')
+    async def msg_relay(self, frame: Frame):
         spaces = self.spaces
         if frame.meta and frame.meta.get('spaces'):
             space_names = self._clean_space_names(frame.meta)
