@@ -8,6 +8,7 @@ from aioredis import pubsub
 from asgiref.sync import async_to_sync
 from quart import session
 
+from zentropi import KB
 from zentropi import Frame
 from zentropi import Kind
 
@@ -59,6 +60,7 @@ class AgentServer(object):
         self._filter_event_names = {'*'}
         self._filter_message_names = {'*'}
         self.load_handlers()
+        self._frame_max_size = 1 * KB
 
     def load_handlers(self):
         for attr_name in dir(self):
@@ -135,7 +137,14 @@ class AgentServer(object):
         while await spaces.wait_message():
             _, frame_as_json = await spaces.get(encoding='utf-8')
             frame = Frame.from_json(frame_as_json)
-            logger.warning(f'Recv bcast {frame.to_dict()}')
+            if self._frame_max_size <= 256:
+                frame._uuid = ''
+                frame._meta = {}
+                frame_as_json = frame.to_json()
+                logger.info(f'Strip uuid and meta from frame as agent {self.agent.name} requested small frames.')
+            if len(frame_as_json) > self._frame_max_size:
+                logger.info(f'Skip frame: {frame.name} for agent {self.agent.name} as size ({len(frame_as_json)}) is larger than {self._frame_max_size} bytes.')
+                continue
             if frame.kind == Kind.EVENT:
                 if '*' in self._filter_event_names:
                     await self.websocket_send(frame)
@@ -150,7 +159,7 @@ class AgentServer(object):
                 elif frame.name in self._filter_message_names:
                     await self.websocket_send(frame)
                     continue
-            logger.warning(f'Skipping frame: {frame.name} for agent {self.agent.name}')
+            logger.info(f'Skipping frame: {frame.name} for agent {self.agent.name}')
 
     async def broadcast_send(self, frame: Frame, spaces: Iterable[Space]):
         meta = {'source': {
@@ -270,12 +279,15 @@ class AgentServer(object):
 
     @on_command('filter')
     async def cmd_filter(self, frame: Frame):
-        if not frame.data.get('names'):
-            await self.websocket_send(
-                frame.reply('filters-failed', data={'error': 'Expected {"names": {"event": [...], "message": [...], ...}}'}))
-            return
-        self._filter_event_names = set(frame.data['names'].get('event', []))
-        self._filter_message_names = set(frame.data['names'].get('message', []))
+        if frame.data.get('size'):
+            self._frame_max_size = int(frame.data.get('size'))
+
+        if frame.data.get('names'):
+            self._filter_event_names = set(frame.data['names'].get('event', []))
+            self._filter_message_names = set(frame.data['names'].get('message', []))
+
+        await self.websocket_send(frame.reply('filter-ok'))
+
 
     @on_command('*')
     async def cmd_unknown(self, frame: Frame):
