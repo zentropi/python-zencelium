@@ -14,6 +14,7 @@ from hypercorn.config import Config as HypercornConfig
 from quart import Quart
 from quart import abort as abort_request
 from quart import flash as flash_message
+from quart import g
 from quart import jsonify
 from quart import request
 from quart import redirect
@@ -35,6 +36,8 @@ from .models import Agent
 from .models import Space
 from .models import db_init
 from .space_server import space_server
+from .token_auth import AgentTokenAuth
+from .util import clean_space_names
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +68,7 @@ app = Quart(f'{__app_name__}')
 app.jinja_env.line_statement_prefix = '@'
 app.jinja_env.line_comment_prefix = '##'
 app.secret_key = config.secret_key
+agent_auth = AgentTokenAuth(app)
 
 
 def login_required(fn):
@@ -382,6 +386,35 @@ async def space_leave(account, name):
     finally:
         return redirect(url_for('space_detail', name=name))
 
+
+@app.route('/api/frame/', methods=['POST'])
+@agent_auth.login_required
+async def frame_create(agent):
+    frame_as_dict = await request.json
+    try:
+        frame = Frame.from_dict(frame_as_dict)
+    except Exception as e:
+        logger.exception(e)
+        abort_request(400)
+    try:
+        if frame.meta.get('spaces'):
+            space_names = clean_space_names(frame.meta.get('spaces'))
+            spaces = Space.select().where(Space.name.in_(space_names) & Space.account == agent.account)
+        else:
+            spaces = agent.spaces()
+        meta = {'source': {'name': agent.name}}
+        if frame.meta:
+            frame._meta.update(meta)
+        else:
+            frame._meta = meta
+        try:
+            await space_server.broadcast(frame, spaces)
+        except KeyError:
+            pass
+        return jsonify({'status': 'ok', 'message': 'Frame was sent.'})
+    except Exception as e:
+        logger.exception(e)
+        return jsonify({'status': 'error', 'message': 'Unable to send frame.'})
 
 @app.route('/console/')
 @login_required
