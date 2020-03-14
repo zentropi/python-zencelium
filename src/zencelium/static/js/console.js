@@ -2,12 +2,16 @@ var kind_map = {
     1: "command",
     2: "event",
     3: "message",
+    4: "request",
+    5: "response",
 };
 
 var kind_icon = {
     1: "⌘",
     2: "↯",
     3: "✉️",
+    4: "➤",
+    5: "⤶",
 }
 
 var console_log = document.getElementById('console_log');
