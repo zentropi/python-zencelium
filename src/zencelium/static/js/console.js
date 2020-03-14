@@ -1,11 +1,13 @@
 var kind_map = {
     1: "command",
     2: "event",
+    3: "message",
 };
 
 var kind_icon = {
-    1: "❆",
+    1: "⌘",
     2: "↯",
+    3: "✉️",
 }
 
 var console_log = document.getElementById('console_log');
