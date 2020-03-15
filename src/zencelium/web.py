@@ -416,6 +416,7 @@ async def frame_create(agent):
         logger.exception(e)
         return jsonify({'status': 'error', 'message': 'Unable to send frame.'})
 
+
 @app.route('/console/')
 @login_required
 async def console(account):
