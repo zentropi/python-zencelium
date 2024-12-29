@@ -2,9 +2,10 @@ from functools import wraps
 
 from quart import g
 from quart import request
-from quart.exceptions import Unauthorized
+from werkzeug.exceptions import Unauthorized
 
 from .models import Agent
+
 
 class AgentTokenAuth(object):
     def __init__(self, app):
@@ -12,8 +13,8 @@ class AgentTokenAuth(object):
         self.app.before_request(self.authenticate)
 
     async def authenticate(self):
-        if 'Authorization' in request.headers:
-            token = request.headers.get('Authorization').replace('Bearer ', '')
+        if "Authorization" in request.headers:
+            token = request.headers.get("Authorization").replace("Bearer ", "")
             try:
                 agent = Agent.get_or_none(token=token)
                 if agent:
@@ -24,7 +25,7 @@ class AgentTokenAuth(object):
     def login_required(self, func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            if not getattr(g, 'agent', None):
+            if not getattr(g, "agent", None):
                 raise Unauthorized()
             else:
                 agent = g.agent
