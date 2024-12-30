@@ -81,7 +81,7 @@ class AgentServer(object):
         self._filter_message_names = {"*"}
         self._filter_request_names = {"*"}
         self.load_handlers()
-        self._frame_max_size = 1 * KB
+        self._frame_max_size = 2 * KB
         self.subscribed = False
 
     def load_handlers(self):
@@ -194,12 +194,12 @@ class AgentServer(object):
                 frame._uuid = ""
                 frame._meta = {}
                 frame_as_json = frame.to_json()
-                logger.info(
+                logger.warning(
                     f"Strip uuid and meta from frame as agent {self.agent.name} requested small frames."
                 )
 
             if len(frame_as_json) > self._frame_max_size:
-                logger.info(
+                logger.warning(
                     f"Skip frame: {frame.name} for agent {self.agent.name} as size ({len(frame_as_json)}) is larger than {self._frame_max_size} bytes."
                 )
                 continue
